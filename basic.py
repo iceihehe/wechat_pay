@@ -66,7 +66,7 @@ class WechatPay(object):
         self._nonce_str = ''.join(random.sample(string.ascii_letters + string.digits, length))
         return self._nonce_str
 
-    def cash_hongbao(self, mch_billno, send_name, nick_name, re_openid, total_amount, wishing, client_ip, act_name, remark, logo_imgurl=None, sub_mch_id=None):
+    def cash_redpack(self, mch_billno, send_name, nick_name, re_openid, total_amount, wishing, client_ip, act_name, remark, logo_imgurl=None, sub_mch_id=None):
         '''普通红包'''
         data  = {
             'mch_billno': mch_billno,
@@ -93,7 +93,7 @@ class WechatPay(object):
             data=data
         )
 
-    def query_hongbao(self, mch_billno):
+    def query_redpack(self, mch_billno):
         '''红包查询'''
         data = {
             'mch_billno': mch_billno,
