@@ -38,6 +38,8 @@ class WechatPay(object):
 
     def xmltoarray(self, xml):
         '''xml转array'''
+        # TODO(iceihehe) 裂变红包的xml有<hblist></hblist> 里面有多个<hbinfo></hbinfo>
+
         array_data = {}
         root = ET.fromstring(xml)
         for child in root:
@@ -94,6 +96,7 @@ class WechatPay(object):
         )
 
     def fission_redpack(self, mch_billno, send_name, re_openid, total_amount, total_num, wishing, act_name, remark, amt_type='ALL_RAND', amt_list=[]):
+        '''裂变红包'''
         data = {
             'mch_billno': mch_billno,
             'wxappid': self._wxappid,
