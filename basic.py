@@ -93,6 +93,24 @@ class WechatPay(object):
             data=data
         )
 
+    def fission_redpack(self, mch_billno, send_name, re_openid, total_amount, total_num, wishing, act_name, remark, amt_type='ALL_RAND', amt_list=[]):
+        data = {
+            'mch_billno': mch_billno,
+            'wxappid': self._wxappid,
+            'send_name': send_name,
+            're_openid': re_openid,
+            'total_amount': str(total_amount),
+            'total_num': str(total_num),
+            'amt_type': amt_type,
+            'wishing': wishing,
+            'act_name': act_name,
+            'remark': remark,
+        }
+        return self._post(
+            url="https://api.mch.weixin.qq.com/mmpaymkttransfers/sendgroupredpack",
+            data=data
+        )
+
     def query_redpack(self, mch_billno):
         '''红包查询'''
         data = {
@@ -128,8 +146,8 @@ class WechatPay(object):
             data=data,
             cert=(self._cert_path, self._key_path)
         )
-        return self.xmltoarray(r.text.encode('utf-8'))
-        # return r.text
+        # return self.xmltoarray(r.text.encode('utf-8'))
+        return r.text
 
     def _post(self, url, **kwargs):
         return self._request(
