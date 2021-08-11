@@ -38,6 +38,8 @@ class WechatPay(object):
 
     def xmltoarray(self, xml):
         '''xml转array'''
+        # TODO(iceihehe) 裂变红包的xml有<hblist></hblist> 里面有多个<hbinfo></hbinfo>
+
         array_data = {}
         root = ET.fromstring(xml)
         for child in root:
@@ -66,12 +68,69 @@ class WechatPay(object):
         self._nonce_str = ''.join(random.sample(string.ascii_letters + string.digits, length))
         return self._nonce_str
 
+    def cash_redpack(self, mch_billno, send_name, nick_name, re_openid, total_amount, wishing, client_ip, act_name, remark, logo_imgurl=None, sub_mch_id=None):
+        '''普通红包'''
+        data  = {
+            'mch_billno': mch_billno,
+            'send_name': send_name,
+            'nick_name': nick_name,
+            're_openid': re_openid,
+            'total_amount': str(total_amount),
+            'total_num': '1',
+            'wishing': wishing,
+            'client_ip': client_ip,
+            'act_name': act_name,
+            'remark': remark,
+            'max_value': str(total_amount),
+            'min_value': str(total_amount),
+            'wxappid': self._wxappid,
+        }
+        if logo_imgurl:
+            data['logo_imgurl'] = logo_imgurl
+        if sub_mch_id:
+            data['sub_mch_id'] = sub_mch_id
+
+        return self._post(
+            url="https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack",
+            data=data
+        )
+
+    def fission_redpack(self, mch_billno, send_name, re_openid, total_amount, total_num, wishing, act_name, remark, amt_type='ALL_RAND', amt_list=[]):
+        '''裂变红包'''
+        data = {
+            'mch_billno': mch_billno,
+            'wxappid': self._wxappid,
+            'send_name': send_name,
+            're_openid': re_openid,
+            'total_amount': str(total_amount),
+            'total_num': str(total_num),
+            'amt_type': amt_type,
+            'wishing': wishing,
+            'act_name': act_name,
+            'remark': remark,
+        }
+        return self._post(
+            url="https://api.mch.weixin.qq.com/mmpaymkttransfers/sendgroupredpack",
+            data=data
+        )
+
+    def query_redpack(self, mch_billno):
+        '''红包查询'''
+        data = {
+            'mch_billno': mch_billno,
+            'bill_type': 'MCHT',
+            'appid': self._wxappid,
+        }
+        return self._post(
+            url="https://api.mch.weixin.qq.com/mmpaymkttransfers/gethbinfo",
+            data=data
+        )
+
     def _request(self, method, url, **kwargs):
         self.generate_noncestr()
         kwargs['data'].update(
             {
                 'mch_id': self._mch_id,
-                'wxappid': self._wxappid,
                 'nonce_str': self._nonce_str,
             }
         )
@@ -90,7 +149,7 @@ class WechatPay(object):
             data=data,
             cert=(self._cert_path, self._key_path)
         )
-        # return self.xmltoarray(r.text)
+        # return self.xmltoarray(r.text.encode('utf-8'))
         return r.text
 
     def _post(self, url, **kwargs):
@@ -105,29 +164,4 @@ class WechatPay(object):
             method='get',
             url=url,
             **kwargs
-        )
-
-    def cash_hongbao(self, mch_billno, send_name, nick_name, re_openid, total_amount, wishing, client_ip, act_name, remark, logo_imgurl=None, sub_mch_id=None):
-        data  = {
-            'mch_billno': mch_billno,
-            'send_name': send_name,
-            'nick_name': nick_name,
-            're_openid': re_openid,
-            'total_amount': str(total_amount),
-            'total_num': '1',
-            'wishing': wishing,
-            'client_ip': client_ip,
-            'act_name': act_name,
-            'remark': remark,
-            'max_value': str(total_amount),
-            'min_value': str(total_amount),
-        }
-        if logo_imgurl:
-            data['logo_imgurl'] = logo_imgurl
-        if sub_mch_id:
-            data['sub_mch_id'] = sub_mch_id
-
-        return self._post(
-            url="https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack",
-            data=data
         )
